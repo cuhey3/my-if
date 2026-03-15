@@ -163,6 +163,16 @@ impl PeerConnectionWrapper {
                 Box::pin(async move {})
             }));
 
+        self.peer_connection.on_negotiation_needed(Box::new(|| {
+            println!("on_negotiation_needed");
+            Box::pin(async move {})
+        }));
+
+        self.peer_connection.on_ice_candidate(Box::new(|c| {
+            println!("on_ice_candidate {:?}", c);
+            Box::pin(async move {})
+        }));
+
         let data_channel = self
             .peer_connection
             .create_data_channel("data", None)
@@ -214,6 +224,16 @@ impl PeerConnectionWrapper {
         let (on_message_tx, on_message_rx) = tokio::sync::mpsc::channel::<DataChannelMessage>(1);
         let (on_open_tx, on_open_rx) = mpsc::channel::<()>(1);
         let (channel_tx, channel_rx) = tokio::sync::mpsc::channel::<Arc<RTCDataChannel>>(1);
+
+        self.peer_connection.on_negotiation_needed(Box::new(|| {
+            println!("on_negotiation_needed");
+            Box::pin(async move {})
+        }));
+
+        self.peer_connection.on_ice_candidate(Box::new(|c| {
+            println!("on_ice_candidate {:?}", c);
+            Box::pin(async move {})
+        }));
 
         self.peer_connection
             .on_peer_connection_state_change(Box::new(|s| {

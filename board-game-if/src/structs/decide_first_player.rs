@@ -209,9 +209,7 @@ impl DecideFirstPlayerSequence {
         self.is_player_a = is_player_a;
     }
 
-    fn create_start_outbound_data(
-        &mut self,
-    ) -> Result<StartDecideFirstPlayerOutboundData, String> {
+    fn create_start_outbound_data(&mut self) -> Result<StartDecideFirstPlayerOutboundData, String> {
         if !self.is_player_a {
             return Err("cannot call method because it is not a player".to_owned());
         }
