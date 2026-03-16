@@ -28,6 +28,12 @@ pub enum SignalingResponseType {
     AnswerAccepted,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub enum SdpType {
+    Offer(String),
+    Answer(String),
+}
+
 impl UserIdRequestType {
     pub fn get_current_user_id(
         &self,

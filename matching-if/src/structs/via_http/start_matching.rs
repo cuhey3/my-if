@@ -28,6 +28,6 @@ pub enum StartMatchingResponseType {
 
 impl RequestBuilder for StartMatchingRequest {
     fn get_uri(&self) -> &str {
-        "http://127.0.0.1:3000/start-matching"
+        "http://127.0.0.1:3000/web_rtc/start-matching"
     }
 }

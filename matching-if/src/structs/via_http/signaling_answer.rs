@@ -18,6 +18,6 @@ pub struct SignalingAnswerResponse {
 
 impl RequestBuilder for SignalingAnswerRequest {
     fn get_uri(&self) -> &str {
-        "http://127.0.0.1:3000/signaling-answer"
+        "http://127.0.0.1:3000/web_rtc/signaling-answer"
     }
 }

@@ -1,6 +1,6 @@
 use crate::apis::RequestBuilder;
 use crate::structs::via_http::common::{
-    SignalingRequestType, SignalingResponseType, UserIdRequestType,
+    SdpType, SignalingRequestType, SignalingResponseType, UserIdRequestType,
 };
 use crate::structs::via_http::send_sdp::{SendSdpRequest, SendSdpResponse};
 use crate::structs::via_http::signaling_answer::SignalingAnswerRequest;
@@ -79,6 +79,7 @@ async fn send_sdp_logic(
     let mut resp = Client::new()
         .request(
             SendSdpRequest {
+                sdp_type: SdpType::Offer(offer.clone()),
                 user_id: own_user_id,
                 app_id: 10,
                 matcher_id: 20,
