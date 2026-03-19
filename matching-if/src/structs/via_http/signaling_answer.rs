@@ -1,4 +1,3 @@
-use crate::apis::RequestBuilder;
 use crate::structs::via_http::common::SignalingResponseType;
 use crate::types::{AppId, MatcherId, UserId};
 use serde::{Deserialize, Serialize};
@@ -14,10 +13,4 @@ pub struct SignalingAnswerRequest {
 #[derive(Deserialize, Serialize)]
 pub struct SignalingAnswerResponse {
     pub signaling_response_type: SignalingResponseType,
-}
-
-impl RequestBuilder for SignalingAnswerRequest {
-    fn get_uri(&self) -> &str {
-        "http://127.0.0.1:3000/web_rtc/signaling-answer"
-    }
 }

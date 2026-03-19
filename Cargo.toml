@@ -1,5 +1,5 @@
 [workspace]
 
-members = ["board-game-if","matching-if"]
+members = ["board-game-if", "http-client-if","matching-if", "webrtc-if"]
 
 resolver = "3"

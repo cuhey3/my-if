@@ -1,4 +1,3 @@
-use crate::apis::RequestBuilder;
 use crate::structs::via_http::common::{
     SignalingRequestType, SignalingResponseType, UserIdRequestType, UserIdResponseType,
 };
@@ -24,10 +23,4 @@ pub struct StartMatchingResponse {
 pub enum StartMatchingResponseType {
     Matched(UserId),
     Waiting,
-}
-
-impl RequestBuilder for StartMatchingRequest {
-    fn get_uri(&self) -> &str {
-        "http://127.0.0.1:3000/web_rtc/start-matching"
-    }
 }
