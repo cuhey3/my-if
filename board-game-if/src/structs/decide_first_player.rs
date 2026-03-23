@@ -1,5 +1,3 @@
-use rand::rngs::SmallRng;
-use rand::{Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
 use std::hash::{DefaultHasher, Hash, Hasher};
 
@@ -61,6 +59,10 @@ impl DecideFirstPlayerSequence {
 
     pub fn is_complete(&self) -> bool {
         self.accepted
+    }
+
+    pub fn get_combine_seed_mod(&self) -> bool {
+        (self.own_seed as u32 as u64 + self.opponent_seed.unwrap_or(0) as u32 as u64) % 2 == 0
     }
 
     pub fn get_question_json(&mut self) -> Result<String, String> {
@@ -139,6 +141,7 @@ impl DecideFirstPlayerSequence {
                 _ => return Err(format!("sequence has invalid position: {}", self.position)),
             }
         }
+
         Ok(())
     }
 
@@ -146,6 +149,7 @@ impl DecideFirstPlayerSequence {
         let Some(first_player_id) = self.suggested_first_player_id else {
             return Err("sequence does not complete, suggested first player id not set".into());
         };
+
         Ok(first_player_id != self.own_user_id)
     }
 
@@ -153,13 +157,15 @@ impl DecideFirstPlayerSequence {
         if self.opponent_user_id.is_none() || self.opponent_seed.is_none() {
             return Err("not ready for decide first player".to_owned());
         }
-        let first_player_is_player_a = SmallRng::seed_from_u64(self.own_seed).random_bool(0.5)
-            != SmallRng::seed_from_u64(self.opponent_seed.unwrap()).random_bool(0.5);
+
+        let first_player_is_player_a = self.get_combine_seed_mod();
+
         if (first_player_is_player_a && self.is_player_a)
             || (!first_player_is_player_a && !self.is_player_a)
         {
             return Ok(self.own_user_id);
         }
+
         Ok(self.opponent_user_id.unwrap())
     }
 
@@ -172,8 +178,11 @@ impl DecideFirstPlayerSequence {
                 "cannot receive start outbound data because it is not b player".to_string(),
             );
         }
+
         self.opponent_user_id = Some(start_outbound_data.user_id);
+
         self.hash = Some(start_outbound_data.hash);
+
         Ok(())
     }
 
@@ -186,8 +195,11 @@ impl DecideFirstPlayerSequence {
                 "cannot receive start outbound data because it is not a player".to_string(),
             );
         }
+
         self.opponent_user_id = Some(start_return_data.user_id);
+
         self.opponent_seed = Some(start_return_data.seed_b);
+
         Ok(())
     }
 
@@ -200,8 +212,11 @@ impl DecideFirstPlayerSequence {
                 "cannot receive start outbound data because it is not b player".to_string(),
             );
         }
+
         self.opponent_seed = Some(end_outbound_data.seed_a);
+
         self.suggested_first_player_id = Some(end_outbound_data.first_player_user_id);
+
         Ok(())
     }
 
@@ -213,8 +228,11 @@ impl DecideFirstPlayerSequence {
         if !self.is_player_a {
             return Err("cannot call method because it is not a player".to_owned());
         }
+
         let hash = self.get_player_a_hash()?;
+
         self.hash = Some(hash);
+
         Ok(StartDecideFirstPlayerOutboundData {
             user_id: self.own_user_id,
             hash,
@@ -225,6 +243,7 @@ impl DecideFirstPlayerSequence {
         if self.is_player_a {
             return Err("cannot call method because it is not b player".to_owned());
         }
+
         Ok(StartDecideFirstPlayerReturnData {
             user_id: self.own_user_id,
             seed_b: self.own_seed,
@@ -235,8 +254,11 @@ impl DecideFirstPlayerSequence {
         if !self.is_player_a {
             return Err("cannot call method because it is not a player".to_owned());
         }
+
         let first_player_user_id = self.decide_first_player()?;
+
         self.suggested_first_player_id = Some(first_player_user_id);
+
         Ok(EndDecideFirstPlayerOutboundData {
             seed_a: self.own_seed,
             first_player_user_id,
@@ -247,16 +269,22 @@ impl DecideFirstPlayerSequence {
         if self.is_player_a {
             return Err("cannot call method because it is not b player".to_owned());
         }
+
         let hash = self.get_player_a_hash()?;
+
         let first_player_user_id = self.decide_first_player()?;
+
         let accept = hash == self.hash.unwrap()
             && self.suggested_first_player_id.unwrap() == first_player_user_id;
+
         self.accepted = accept;
+
         Ok(EndDecideFirstPlayerReturnData { accept })
     }
 
     fn get_player_a_hash(&self) -> Result<u64, String> {
         let mut hasher = DefaultHasher::new();
+
         if self.is_player_a {
             self.own_seed.hash(&mut hasher);
         } else {
@@ -264,6 +292,7 @@ impl DecideFirstPlayerSequence {
                 .ok_or_else(|| "opponent seed not set".to_owned())?
                 .hash(&mut hasher);
         }
+
         Ok(hasher.finish())
     }
 }

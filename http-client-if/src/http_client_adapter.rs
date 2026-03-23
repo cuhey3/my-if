@@ -7,7 +7,7 @@ pub trait HttpClientAdapter: Sized {
         &mut self,
         full_url: &str,
         data: &T,
-    ) -> impl Future<Output = Result<(), Box<dyn std::error::Error + Send + Sync>>> + Send;
+    ) -> impl Future<Output = Result<(), Box<dyn std::error::Error + Send + Sync>>>;
 
     fn status_is_ok(&self) -> Result<bool, String>;
 
