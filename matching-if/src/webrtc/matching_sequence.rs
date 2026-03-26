@@ -1,4 +1,4 @@
-use crate::types::UserId;
+use crate::types::{MatcherId, UserId};
 use crate::webrtc::matching_client::MatchingClient;
 use http_client_if::http_client_adapter::HttpClientAdapter;
 use std::marker::PhantomData;
@@ -7,14 +7,16 @@ use webrtc_if::peer_connection_adapter::PeerConnectionAdapter;
 pub struct MatchingSequence<T: PeerConnectionAdapter, U: HttpClientAdapter> {
     user_id: UserId,
     opponent_user_id: UserId,
+    matcher_id: MatcherId,
     server_domain: String,
     matching_client: Option<MatchingClient<U>>,
     phantom_data: PhantomData<T>,
 }
 
 impl<T: PeerConnectionAdapter, U: HttpClientAdapter> MatchingSequence<T, U> {
-    pub fn new(server_domain: String) -> Self {
+    pub fn new(server_domain: String, matcher_id: u64) -> Self {
         Self {
+            matcher_id,
             user_id: 0,
             opponent_user_id: 0,
             server_domain,
@@ -32,7 +34,7 @@ impl<T: PeerConnectionAdapter, U: HttpClientAdapter> MatchingSequence<T, U> {
             .matching_client
             .as_ref()
             .unwrap()
-            .start_peer_connection()
+            .start_peer_connection(self.matcher_id)
             .await?;
 
         self.user_id = *start_peer_connection_response.get_user_id();
@@ -59,7 +61,7 @@ impl<T: PeerConnectionAdapter, U: HttpClientAdapter> MatchingSequence<T, U> {
         self.matching_client
             .as_ref()
             .unwrap()
-            .send_answer(self.user_id, self.opponent_user_id, answer)
+            .send_answer(self.user_id, self.opponent_user_id, self.matcher_id, answer)
             .await?;
 
         wrapper.ready_to_open_data_channel().await?;
@@ -78,7 +80,7 @@ impl<T: PeerConnectionAdapter, U: HttpClientAdapter> MatchingSequence<T, U> {
             .matching_client
             .as_ref()
             .unwrap()
-            .send_offer(self.user_id, self.opponent_user_id, offer)
+            .send_offer(self.user_id, self.opponent_user_id, self.matcher_id, offer)
             .await?;
 
         wrapper.set_answer(&answer)?;

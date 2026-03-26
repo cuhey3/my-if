@@ -5,7 +5,7 @@ use crate::structs::via_http::send_sdp::{SendSdpRequest, SendSdpResponse};
 use crate::structs::via_http::start_matching::{
     StartMatchingRequest, StartMatchingResponse, StartMatchingResponseType,
 };
-use crate::types::UserId;
+use crate::types::{MatcherId, UserId};
 use http_client_if::http_client_adapter::HttpClientAdapter;
 use std::marker::PhantomData;
 
@@ -46,6 +46,7 @@ impl StartPeerConnectionResponse {
 impl<T: HttpClientAdapter> MatchingClient<T> {
     pub async fn start_peer_connection(
         &self,
+        matcher_id: MatcherId,
     ) -> Result<StartPeerConnectionResponse, Box<dyn std::error::Error + Send + Sync>> {
         let mut client = T::new();
         client
@@ -54,7 +55,7 @@ impl<T: HttpClientAdapter> MatchingClient<T> {
                 &StartMatchingRequest {
                     user_id_request_type: UserIdRequestType::Creating,
                     signaling_request_type: SignalingRequestType::OfferAccepting,
-                    matcher_id: 20,
+                    matcher_id,
                     app_id: 10,
                 },
             )
@@ -91,6 +92,7 @@ impl<T: HttpClientAdapter> MatchingClient<T> {
         &self,
         user_id: UserId,
         opponent_id: UserId,
+        matcher_id: MatcherId,
         answer: String,
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let mut client = T::new();
@@ -102,7 +104,7 @@ impl<T: HttpClientAdapter> MatchingClient<T> {
                     sdp_type: SdpType::Answer(answer),
                     user_id,
                     app_id: 10,
-                    matcher_id: 20,
+                    matcher_id,
                     opponent_id,
                     offer: "".to_owned(),
                 },
@@ -121,6 +123,7 @@ impl<T: HttpClientAdapter> MatchingClient<T> {
         &self,
         user_id: UserId,
         opponent_id: UserId,
+        matcher_id: MatcherId,
         offer: String,
     ) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
         let mut client = T::new();
@@ -132,7 +135,7 @@ impl<T: HttpClientAdapter> MatchingClient<T> {
                     sdp_type: SdpType::Offer(offer.clone()),
                     user_id,
                     app_id: 10,
-                    matcher_id: 20,
+                    matcher_id,
                     opponent_id,
                     offer,
                 },
