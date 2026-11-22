@@ -26,6 +26,10 @@ pub trait PeerConnectionAdapter: Sized {
 
     fn send_json(&self, json: &str) -> impl Future<Output = Result<usize, String>>;
 
+    fn send_string_no_result(&self, value: String) -> impl Future<Output = ()> {
+        async {}
+    }
+
     fn wait_message_json(&self) -> impl Future<Output = Result<String, String>>;
 
     fn create_connection_wrapper(user_id: u64) -> impl Future<Output = Result<Self, String>>;
